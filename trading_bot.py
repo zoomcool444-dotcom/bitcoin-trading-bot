@@ -1,10 +1,15 @@
 import time
-import winsound
 import pandas as pd
 import yfinance as yf
 import urllib.request
 import urllib.parse
 import os
+
+# Winsound safe import for cross-platform (Windows / Linux-Railway)
+try:
+    import winsound
+except ImportError:
+    winsound = None
 
 # Telegram Configuration
 TELEGRAM_TOKEN = '8711625179:AAENf-W7ddWXK8iz2TTgz_wF84okEfXGvS4'
@@ -64,7 +69,8 @@ while True:
                 msg = f"🚨 [PAPER BUY]\nBTC Purchased at: {buy_price:.2f}\nRSI: {rsi:.1f}"
                 print(f"--> {msg}")
                 send_telegram_message(msg)
-                winsound.Beep(1000, 500)
+                if winsound:
+                    winsound.Beep(1000, 500)
                 
                 with open(log_file, "a") as f:
                     f.write(f"BUY,{buy_price},0.0\n")
@@ -77,11 +83,12 @@ while True:
                 msg = f"✅ [TAKE PROFIT HIT]\nSold at: {current_price:.2f}\nProfit: +{pnl:.2f}%\nTotal PnL: {total_pnl_pct:+.2f}%"
                 print(f"--> {msg}")
                 send_telegram_message(msg)
-                winsound.Beep(1500, 800)
+                if winsound:
+                    winsound.Beep(1500, 800)
                 
                 with open(log_file, "a") as f:
                     f.write(f"SELL_PROFIT,{current_price},{pnl:.2f}\n")
-                
+            
             # 3. Stop Loss (2%)
             elif in_position and current_price <= (buy_price * 0.98):
                 pnl = ((current_price - buy_price) / buy_price) * 100
@@ -90,7 +97,8 @@ while True:
                 msg = f"❌ [STOP LOSS HIT]\nSold at: {current_price:.2f}\nLoss: {pnl:.2f}%\nTotal PnL: {total_pnl_pct:+.2f}%"
                 print(f"--> {msg}")
                 send_telegram_message(msg)
-                winsound.Beep(500, 1000)
+                if winsound:
+                    winsound.Beep(500, 1000)
                 
                 with open(log_file, "a") as f:
                     f.write(f"SELL_LOSS,{current_price},{pnl:.2f}\n")
